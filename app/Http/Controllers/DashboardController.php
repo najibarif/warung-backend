@@ -15,8 +15,17 @@ class DashboardController extends Controller
 
         $salesToday = Order::whereDate('created_at', $today)->sum('total_amount');
         $transactionsToday = Order::whereDate('created_at', $today)->count();
-        $totalProducts = Product::count();
-        $lowStockProducts = Product::where('stock', '<', 10)->count();
+        $allProducts = Product::all(['stock']);
+        $totalProducts = $allProducts->count();
+        
+        $lowStockProducts = $allProducts->filter(function ($product) {
+            $stock = (int) $product->stock;
+            return $stock <= 10 && $stock > 0;
+        })->count();
+
+        $outOfStockProducts = $allProducts->filter(function ($product) {
+            return (int) $product->stock === 0;
+        })->count();
 
         // Data grafik penjualan 7 hari terakhir
         $chartData = [];
@@ -35,6 +44,7 @@ class DashboardController extends Controller
                 'transactions_today' => $transactionsToday,
                 'total_products' => $totalProducts,
                 'low_stock_products' => $lowStockProducts,
+                'out_of_stock_products' => $outOfStockProducts,
                 'weekly_sales' => $chartData
             ]
         ]);

@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function index()
+    {
+        $orders = Order::with('items.product')->latest()->get();
+        return response()->json(['data' => $orders]);
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -19,14 +24,12 @@ class OrderController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
-
             $totalAmount = 0;
             $orderItems = [];
 
             // Hitung total dan validasi stok
             foreach ($request->items as $item) {
-                $product = Product::lockForUpdate()->find($item['product_id']);
+                $product = Product::find($item['product_id']);
                 
                 if ($product->stock < $item['quantity']) {
                     return response()->json([
@@ -48,8 +51,12 @@ class OrderController extends Controller
                 $product->decrement('stock', $item['quantity']);
             }
 
-            // Buat Order
+            // Buat Order (Kode Unik: TanggalJam-HurufBulanMenitTahun)
+            $monthLetter = chr(64 + (int)date('m')); // 1=A, 2=B, 6=F, dst
+            $uniqueCode = date('d') . date('H') . '-' . $monthLetter . date('i') . date('y');
+
             $order = Order::create([
+                'order_number' => $uniqueCode,
                 'user_id' => $request->user()->id ?? null,
                 'total_amount' => $totalAmount,
                 'payment_method' => 'tunai',
@@ -60,15 +67,12 @@ class OrderController extends Controller
                 $order->items()->create($item);
             }
 
-            DB::commit();
-
             return response()->json([
                 'message' => 'Transaksi berhasil!',
                 'data' => $order->load('items.product')
             ], 201);
 
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'message' => 'Gagal memproses transaksi: ' . $e->getMessage()
             ], 500);

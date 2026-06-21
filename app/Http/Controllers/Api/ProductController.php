@@ -14,12 +14,12 @@ class ProductController extends Controller
     /** GET /api/products — Public */
     public function index(Request $request)
     {
-        $query = Product::with('category')->withCount('favorites');
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
+        $query = Product::query()->with('category');
 
         // Search
         if ($search = $request->search) {
             $query->where('name', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
                 ->orWhere('barcode', $search);
         }
 
@@ -28,19 +28,13 @@ class ProductController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        // Filter by promo
-        if ($request->boolean('promo')) {
-            $query->where('is_promo', true);
-        }
-
-        // Best sellers
-        if ($request->boolean('best_seller')) {
-            $query->where('is_best_seller', true);
-        }
-
-        // Low stock (admin only)
-        if ($request->boolean('low_stock')) {
-            $query->where('stock', '<=', 5);
+        // Filter
+        if ($request->filter === 'low_stock') {
+            $query->where('stock', '<=', 10)->where('stock', '>', 0);
+        } elseif ($request->filter === 'out_of_stock') {
+            $query->where('stock', '<=', 0);
+        } elseif ($request->boolean('low_stock')) {
+            $query->where('stock', '<=', 10);
         }
 
         $products = $query->orderBy('name')->paginate($request->input('per_page', 20));
@@ -59,20 +53,20 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|string',
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'is_promo' => 'boolean',
-            'promo_price' => 'nullable|numeric|min:0',
+            'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode',
-            'is_best_seller' => 'boolean',
         ]);
 
+        $validated['price'] = (float) $validated['price'];
+        $validated['stock'] = (int) $validated['stock'];
+
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
         }
 
         $product = Product::create($validated);
@@ -84,17 +78,16 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'category_id' => 'sometimes|exists:categories,id',
+            'category_id' => 'sometimes|string',
             'name' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
             'stock' => 'sometimes|integer|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'is_promo' => 'boolean',
-            'promo_price' => 'nullable|numeric|min:0',
+            'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode,' . $product->id,
-            'is_best_seller' => 'boolean',
         ]);
+
+        if (isset($validated['price'])) $validated['price'] = (float) $validated['price'];
+        if (isset($validated['stock'])) $validated['stock'] = (int) $validated['stock'];
 
         // Track price history if price changed
         if (isset($validated['price']) && $validated['price'] != $product->price) {
@@ -114,6 +107,15 @@ class ProductController extends Controller
                 Storage::disk('public')->delete($product->image);
             }
             $validated['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image) && !str_starts_with($product->image, 'http')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            }
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image'] = $path;
         }
 
         $product->update($validated);

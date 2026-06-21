@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
         // Kasir & Dashboard
+        Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index']);
         Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
         Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'stats']);
     });

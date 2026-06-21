@@ -1,59 +1,57 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplikasi Warung - Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Proyek ini adalah pusat inti logika (*Core API*) untuk ekosistem Aplikasi Warung. Dibangun menggunakan framework **Laravel**, backend ini menyediakan API otentikasi, manajemen produk, kasir/POS, hingga rekam data.
 
-## About Laravel
+## 🛠 Teknologi Utama
+- **Framework**: Laravel 11/12
+- **Database**: MongoDB (via driver `mongodb/laravel-mongodb`)
+- **Autentikasi**: Laravel Sanctum (Token-based API Auth)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ⚙️ Cara Menjalankan di Lokal (Development)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Untuk tahap *development*, pastikan **MongoDB Community Server** lokal Anda berjalan di *port* default (`27017`).
 
-## Learning Laravel
+1. Konfigurasi file `.env` untuk database lokal:
+   ```env
+   DB_CONNECTION=mongodb
+   DB_HOST=127.0.0.1
+   DB_PORT=27017
+   DB_DATABASE=warung
+   ```
+2. Jalankan perintah instalasi (jika baru di-*clone*):
+   ```bash
+   composer install
+   ```
+3. Suntikkan data awal (Admin, Kategori, Produk Sampel):
+   ```bash
+   php artisan db:seed
+   ```
+4. Jalankan *server lokal*:
+   ```bash
+   php artisan serve
+   ```
+   *API akan dapat diakses secara lokal di `http://127.0.0.1:8000/api`*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Persiapan Deployment (Production)
 
-## Laravel Sponsors
+Saat aplikasi siap dinaikkan ke internet:
+1. Pastikan server VPS Anda memiliki instalasi **PHP MongoDB Extension** (`mongodb.so`).
+2. Hubungkan domain production Anda (misal: `https://warung-backend.nue.dom.my.id`).
+3. Pada file `.env` di server, sesuaikan koneksi `DB_HOST` dan `DB_PASSWORD` jika Anda menggunakan database cloud (seperti MongoDB Atlas) atau ubah sesuai environment VPS Anda.
+4. Client/Frontend harus memanggil rute dari `https://warung-backend.nue.dom.my.id/api`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 💡 Perintah Penting (Cheat Sheet)
+- Membersihkan seluruh *cache* (dibutuhkan jika Anda baru mengubah file konfigurasi atau `.env`):
+  ```bash
+  php artisan optimize:clear
+  ```
+- Menambah library baru:
+  ```bash
+  composer require <nama-paket>
+  ```

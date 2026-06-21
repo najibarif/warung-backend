@@ -12,7 +12,7 @@ class CategoryController extends Controller
     /** GET /api/categories — Public */
     public function index()
     {
-        $categories = Category::withCount('products')->orderBy('name')->get();
+        $categories = Category::query()->orderBy('name')->get();
         return CategoryResource::collection($categories);
     }
 
