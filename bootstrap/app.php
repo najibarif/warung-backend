@@ -21,3 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->create();
 
+// FIX UNTUK VERCEL: Pindahkan direktori storage ke /tmp karena Vercel read-only
+if (isset($_ENV['VERCEL']) || getenv('VERCEL')) {
+    $app->useStoragePath('/tmp/storage');
+    if (!is_dir('/tmp/storage/framework/views')) {
+        mkdir('/tmp/storage/framework/views', 0777, true);
+        mkdir('/tmp/storage/framework/cache/data', 0777, true);
+        mkdir('/tmp/storage/framework/sessions', 0777, true);
+        mkdir('/tmp/storage/logs', 0777, true);
+    }
+}
+
+return $app;
