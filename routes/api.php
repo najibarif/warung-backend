@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\PriceHistoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,7 +23,7 @@ Route::get('/ping', function () {
     ]);
 });
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 // Products (public read)
 Route::get('/products', [ProductController::class, 'index']);
@@ -58,11 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
         // Kasir & Dashboard
-        Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index']);
-        Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show']);
-        Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'stats']);
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::get('/orders/{order}', [OrderController::class, 'show']);
+        Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     });
 
     // Orders checkout (any logged in customer/admin)
-    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
+    Route::post('/orders', [OrderController::class, 'store']);
 });

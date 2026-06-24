@@ -29,3 +29,5 @@ vercel.json
 /storage/logs/*
 .vercel/
 /database/database.sqlite
+/_check.php
+/_test_login.php

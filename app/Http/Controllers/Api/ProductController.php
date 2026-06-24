@@ -45,7 +45,7 @@ class ProductController extends Controller
             $query->where('stock', '<=', 10);
         }
 
-        $products = $query->orderBy('name')->paginate($request->input('per_page', 20));
+        $products = $query->orderBy('name')->paginate(min((int) $request->input('per_page', 20), 100));
 
         return ProductResource::collection($products);
     }
