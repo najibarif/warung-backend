@@ -14,7 +14,7 @@ class DashboardController extends Controller
 
         $salesToday = Order::whereDate('created_at', $today)->sum('total_amount');
         $transactionsToday = Order::whereDate('created_at', $today)->count();
-        $allProducts = Product::all(['stock']);
+        $allProducts = Product::all(['stock', 'expired_at']);
         $totalProducts = $allProducts->count();
         
         $lowStockProducts = $allProducts->filter(function ($product) {
@@ -24,6 +24,18 @@ class DashboardController extends Controller
 
         $outOfStockProducts = $allProducts->filter(function ($product) {
             return (int) $product->stock === 0;
+        })->count();
+
+        $almostExpiredProducts = $allProducts->filter(function ($product) {
+            if (!$product->expired_at) return false;
+            $daysLeft = now()->diffInDays($product->expired_at, false);
+            return $daysLeft >= 0 && $daysLeft <= 30;
+        })->count();
+
+        $expiredProducts = $allProducts->filter(function ($product) {
+            if (!$product->expired_at) return false;
+            $daysLeft = now()->diffInDays($product->expired_at, false);
+            return $daysLeft < 0;
         })->count();
 
         // Data grafik penjualan 7 hari terakhir
@@ -44,6 +56,8 @@ class DashboardController extends Controller
                 'total_products' => $totalProducts,
                 'low_stock_products' => $lowStockProducts,
                 'out_of_stock_products' => $outOfStockProducts,
+                'almost_expired_products' => $almostExpiredProducts,
+                'expired_products' => $expiredProducts,
                 'weekly_sales' => $chartData
             ]
         ]);

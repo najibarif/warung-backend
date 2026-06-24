@@ -76,7 +76,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Kasir & Dashboard
         Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index']);
         Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show']);
-        Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
         Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'stats']);
     });
+
+    // Orders checkout (any logged in customer/admin)
+    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
 });

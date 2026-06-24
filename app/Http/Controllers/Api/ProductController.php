@@ -33,6 +33,13 @@ class ProductController extends Controller
             $query->where('stock', '<=', 10)->where('stock', '>', 0);
         } elseif ($request->filter === 'out_of_stock') {
             $query->where('stock', '<=', 0);
+        } elseif ($request->filter === 'almost_expired') {
+            $query->whereNotNull('expired_at')
+                ->where('expired_at', '>=', now())
+                ->where('expired_at', '<=', now()->addDays(30));
+        } elseif ($request->filter === 'expired') {
+            $query->whereNotNull('expired_at')
+                ->where('expired_at', '<', now()->startOfDay());
         } elseif ($request->boolean('low_stock')) {
             $query->where('stock', '<=', 10);
         }
