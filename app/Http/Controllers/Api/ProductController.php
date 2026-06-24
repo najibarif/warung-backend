@@ -60,17 +60,21 @@ class ProductController extends Controller
             'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode',
             'description' => 'nullable|string',
-            'is_promo' => 'nullable',
+            'is_promo' => 'nullable|boolean',
             'promo_price' => 'nullable|numeric|min:0',
-            'is_best_seller' => 'nullable',
+            'is_best_seller' => 'nullable|boolean',
+            'expired_at' => 'nullable|date_format:Y-m-d',
+            'expiration_discount' => 'nullable|integer|min:0|max:100',
         ]);
 
         $validated['price'] = (float) $validated['price'];
         $validated['stock'] = (int) $validated['stock'];
-        $validated['is_promo'] = $request->boolean('is_promo');
-        $validated['is_best_seller'] = $request->boolean('is_best_seller');
-        $validated['promo_price'] = $request->filled('promo_price') ? (float) $request->promo_price : null;
-        $validated['description'] = $request->description;
+        if (isset($validated['is_promo'])) $validated['is_promo'] = filter_var($validated['is_promo'], FILTER_VALIDATE_BOOLEAN);
+        if (isset($validated['is_best_seller'])) $validated['is_best_seller'] = filter_var($validated['is_best_seller'], FILTER_VALIDATE_BOOLEAN);
+        if (isset($validated['expiration_discount'])) $validated['expiration_discount'] = (int) $validated['expiration_discount'];
+        if (isset($validated['promo_price'])) {
+            $validated['promo_price'] = ($validated['promo_price'] !== '' && $validated['promo_price'] !== null) ? (float) $validated['promo_price'] : null;
+        }
 
         if ($request->hasFile('image')) {
             try {
@@ -97,18 +101,21 @@ class ProductController extends Controller
             'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode,' . $product->id,
             'description' => 'nullable|string',
-            'is_promo' => 'nullable',
+            'is_promo' => 'nullable|boolean',
             'promo_price' => 'nullable|numeric|min:0',
-            'is_best_seller' => 'nullable',
+            'is_best_seller' => 'nullable|boolean',
+            'expired_at' => 'nullable|date_format:Y-m-d',
+            'expiration_discount' => 'nullable|integer|min:0|max:100',
         ]);
 
         if (isset($validated['price'])) $validated['price'] = (float) $validated['price'];
         if (isset($validated['stock'])) $validated['stock'] = (int) $validated['stock'];
-
-        if ($request->has('is_promo')) $validated['is_promo'] = $request->boolean('is_promo');
-        if ($request->has('is_best_seller')) $validated['is_best_seller'] = $request->boolean('is_best_seller');
-        if ($request->has('promo_price')) $validated['promo_price'] = $request->filled('promo_price') ? (float) $request->promo_price : null;
-        if ($request->has('description')) $validated['description'] = $request->description;
+        if (isset($validated['is_promo'])) $validated['is_promo'] = filter_var($validated['is_promo'], FILTER_VALIDATE_BOOLEAN);
+        if (isset($validated['is_best_seller'])) $validated['is_best_seller'] = filter_var($validated['is_best_seller'], FILTER_VALIDATE_BOOLEAN);
+        if (isset($validated['expiration_discount'])) $validated['expiration_discount'] = (int) $validated['expiration_discount'];
+        if (isset($validated['promo_price'])) {
+            $validated['promo_price'] = ($validated['promo_price'] !== '' && $validated['promo_price'] !== null) ? (float) $validated['promo_price'] : null;
+        }
 
         if (isset($validated['price']) && $validated['price'] != $product->price) {
             PriceHistory::create([

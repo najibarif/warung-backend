@@ -18,6 +18,12 @@ class ProductResource extends JsonResource
             'is_low_stock' => $this->is_low_stock,
             'image' => $this->image ? (str_starts_with($this->image, 'http') ? $this->image : asset('storage/' . $this->image)) : null,
             'barcode' => $this->barcode,
+            'description' => $this->description,
+            'is_promo' => $this->is_promo,
+            'promo_price' => $this->promo_price,
+            'is_best_seller' => $this->is_best_seller,
+            'expired_at' => $this->expired_at ? $this->expired_at->format('Y-m-d') : null,
+            'expiration_discount' => $this->expiration_discount,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
