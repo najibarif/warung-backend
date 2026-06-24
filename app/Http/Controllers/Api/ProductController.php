@@ -59,10 +59,18 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode',
+            'description' => 'nullable|string',
+            'is_promo' => 'nullable',
+            'promo_price' => 'nullable|numeric|min:0',
+            'is_best_seller' => 'nullable',
         ]);
 
         $validated['price'] = (float) $validated['price'];
         $validated['stock'] = (int) $validated['stock'];
+        $validated['is_promo'] = $request->boolean('is_promo');
+        $validated['is_best_seller'] = $request->boolean('is_best_seller');
+        $validated['promo_price'] = $request->filled('promo_price') ? (float) $request->promo_price : null;
+        $validated['description'] = $request->description;
 
         if ($request->hasFile('image')) {
             try {
@@ -88,10 +96,19 @@ class ProductController extends Controller
             'stock' => 'sometimes|integer|min:0',
             'image' => 'nullable',
             'barcode' => 'nullable|string|unique:products,barcode,' . $product->id,
+            'description' => 'nullable|string',
+            'is_promo' => 'nullable',
+            'promo_price' => 'nullable|numeric|min:0',
+            'is_best_seller' => 'nullable',
         ]);
 
         if (isset($validated['price'])) $validated['price'] = (float) $validated['price'];
         if (isset($validated['stock'])) $validated['stock'] = (int) $validated['stock'];
+
+        if ($request->has('is_promo')) $validated['is_promo'] = $request->boolean('is_promo');
+        if ($request->has('is_best_seller')) $validated['is_best_seller'] = $request->boolean('is_best_seller');
+        if ($request->has('promo_price')) $validated['promo_price'] = $request->filled('promo_price') ? (float) $request->promo_price : null;
+        if ($request->has('description')) $validated['description'] = $request->description;
 
         if (isset($validated['price']) && $validated['price'] != $product->price) {
             PriceHistory::create([
