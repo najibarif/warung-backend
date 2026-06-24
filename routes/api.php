@@ -1,13 +1,5 @@
 <?php
 
-Route::get('/', function () {
-    return response()->json([
-        'app' => 'AplikasiWarung API',
-        'version' => '1.0.0',
-        'status' => 'running'
-    ]);
-});
-
 Route::get('/ping', function () {
     return response()->json(['pong' => true]);
 });
