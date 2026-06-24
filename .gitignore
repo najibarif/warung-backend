@@ -25,3 +25,7 @@ Thumbs.db
 
 .vercel
 vercel.json
+/bootstrap/cache/*
+/storage/logs/*
+.vercel/
+/database/database.sqlite

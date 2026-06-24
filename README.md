@@ -1,57 +1,32 @@
-# Aplikasi Warung - Backend API
+# Toko Nabil API
 
-Proyek ini adalah pusat inti logika (*Core API*) untuk ekosistem Aplikasi Warung. Dibangun menggunakan framework **Laravel**, backend ini menyediakan API otentikasi, manajemen produk, kasir/POS, hingga rekam data.
+Backend API untuk aplikasi Toko Nabil (warung/toko sembako).
 
-## 🛠 Teknologi Utama
-- **Framework**: Laravel 11/12
-- **Database**: MongoDB (via driver `mongodb/laravel-mongodb`)
-- **Autentikasi**: Laravel Sanctum (Token-based API Auth)
+## Tech Stack
 
----
+- Laravel 12
+- Sanctum (token auth)
+- MySQL / TiDB
+- Vercel (deployment)
 
-## ⚙️ Cara Menjalankan di Lokal (Development)
+## Setup Lokal
 
-Untuk tahap *development*, pastikan **MongoDB Community Server** lokal Anda berjalan di *port* default (`27017`).
+```bash
+cp .env.example .env
+# edit .env sesuai database kamu
+composer install
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
 
-1. Konfigurasi file `.env` untuk database lokal:
-   ```env
-   DB_CONNECTION=mongodb
-   DB_HOST=127.0.0.1
-   DB_PORT=27017
-   DB_DATABASE=warung
-   ```
-2. Jalankan perintah instalasi (jika baru di-*clone*):
-   ```bash
-   composer install
-   ```
-3. Suntikkan data awal (Admin, Kategori, Produk Sampel):
-   ```bash
-   php artisan db:seed
-   ```
-4. Jalankan *server lokal*:
-   ```bash
-   php artisan serve
-   ```
-   *API akan dapat diakses secara lokal di `http://127.0.0.1:8000/api`*
+## API Endpoints
 
----
+Lihat [routes/api.php](routes/api.php) untuk daftar lengkap endpoint.
 
-## 🚀 Persiapan Deployment (Production)
+## Deploy ke Vercel
 
-Saat aplikasi siap dinaikkan ke internet:
-1. Pastikan server VPS Anda memiliki instalasi **PHP MongoDB Extension** (`mongodb.so`).
-2. Hubungkan domain production Anda (misal: `https://warung-backend.nue.dom.my.id`).
-3. Pada file `.env` di server, sesuaikan koneksi `DB_HOST` dan `DB_PASSWORD` jika Anda menggunakan database cloud (seperti MongoDB Atlas) atau ubah sesuai environment VPS Anda.
-4. Client/Frontend harus memanggil rute dari `https://warung-backend.nue.dom.my.id/api`.
-
----
-
-## 💡 Perintah Penting (Cheat Sheet)
-- Membersihkan seluruh *cache* (dibutuhkan jika Anda baru mengubah file konfigurasi atau `.env`):
-  ```bash
-  php artisan optimize:clear
-  ```
-- Menambah library baru:
-  ```bash
-  composer require <nama-paket>
-  ```
+Pastikan environment variables berikut sudah diset di Vercel Dashboard:
+- `APP_KEY`
+- `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+- `CORS_ALLOWED_ORIGINS`
