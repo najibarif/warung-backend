@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -22,7 +24,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -30,62 +32,66 @@ class OrderController extends Controller
         ]);
 
         try {
-            $totalAmount = 0;
-            $orderItems = [];
+            return DB::transaction(function () use ($validated, $request) {
+                $totalAmount = 0;
+                $orderItems = [];
 
-            // Hitung total dan validasi stok
-            foreach ($request->items as $item) {
-                $product = Product::find($item['product_id']);
-                
-                if ($product->stock < $item['quantity']) {
-                    return response()->json([
-                        'message' => "Stok produk {$product->name} tidak mencukupi."
-                    ], 400);
+                foreach ($validated['items'] as $item) {
+                    $product = Product::where('id', $item['product_id'])
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    if ($product->stock < $item['quantity']) {
+                        return response()->json([
+                            'message' => "Stok produk {$product->name} tidak mencukupi."
+                        ], 400);
+                    }
+
+                    $price = $product->effective_price;
+                    $subtotal = $price * $item['quantity'];
+                    $totalAmount += $subtotal;
+
+                    $orderItems[] = [
+                        'product_id' => $product->id,
+                        'quantity' => $item['quantity'],
+                        'price' => $price,
+                    ];
+
+                    $product->decrement('stock', $item['quantity']);
                 }
 
-                $price = $product->is_promo && $product->promo_price ? $product->promo_price : $product->price;
-                $subtotal = $price * $item['quantity'];
-                $totalAmount += $subtotal;
+                $monthLetter = chr(64 + (int)date('m'));
+                $uniqueCode = date('d') . date('H') . '-' . $monthLetter . date('i') . date('y') . '-' . uniqid();
 
-                $orderItems[] = [
-                    'product_id' => $product->id,
-                    'quantity' => $item['quantity'],
-                    'price' => $price,
-                ];
+                $amountPaid = $validated['amount_paid'] ?? $totalAmount;
+                $changeAmount = max(0, $amountPaid - $totalAmount);
 
-                // Kurangi stok
-                $product->decrement('stock', $item['quantity']);
-            }
+                $order = Order::create([
+                    'order_number' => $uniqueCode,
+                    'user_id' => $request->user()->id ?? null,
+                    'total_amount' => $totalAmount,
+                    'amount_paid' => $amountPaid,
+                    'change_amount' => $changeAmount,
+                    'payment_method' => 'tunai',
+                ]);
 
-            // Buat Order (Kode Unik: TanggalJam-HurufBulanMenitTahun)
-            $monthLetter = chr(64 + (int)date('m')); // 1=A, 2=B, 6=F, dst
-            $uniqueCode = date('d') . date('H') . '-' . $monthLetter . date('i') . date('y');
+                foreach ($orderItems as $item) {
+                    $order->items()->create($item);
+                }
 
-            $amountPaid = $request->amount_paid ?? $totalAmount;
-            $changeAmount = max(0, $amountPaid - $totalAmount);
-
-            $order = Order::create([
-                'order_number' => $uniqueCode,
-                'user_id' => $request->user()->id ?? null,
-                'total_amount' => $totalAmount,
-                'amount_paid' => $amountPaid,
-                'change_amount' => $changeAmount,
-                'payment_method' => 'tunai',
+                return response()->json([
+                    'message' => 'Transaksi berhasil!',
+                    'data' => $order->load('items.product')
+                ], 201);
+            });
+        } catch (\Exception $e) {
+            Log::error('Order creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'validated' => $validated,
             ]);
 
-            // Buat Order Items
-            foreach ($orderItems as $item) {
-                $order->items()->create($item);
-            }
-
             return response()->json([
-                'message' => 'Transaksi berhasil!',
-                'data' => $order->load('items.product')
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal memproses transaksi: ' . $e->getMessage()
+                'message' => 'Gagal memproses transaksi.'
             ], 500);
         }
     }

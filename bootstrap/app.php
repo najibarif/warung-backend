@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\SecurityHeadersMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,12 +17,21 @@ $app = Application::configure(basePath: dirname(__DIR__))
         if (isset($_ENV['VERCEL']) || getenv('VERCEL')) {
             $middleware->trustProxies(at: '*');
         }
+        $middleware->api(prepend: [
+            SecurityHeadersMiddleware::class,
+        ]);
         $middleware->alias([
             'admin' => AdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Internal Server Error'
+                ], 500);
+            }
+        });
     })->create();
 
 // Pindahkan direktori storage ke /tmp karena Vercel read-only

@@ -14,9 +14,9 @@ class DatabaseSeeder extends Seeder
     {
         // Admin user
         User::updateOrCreate(
-            ['email' => 'admin@warung.com'],
+            ['email' => 'admin@tokonabil.com'],
             [
-                'name' => 'Admin Warung',
+                'name' => 'Admin Toko Nabil',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
             ]
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
         // Guest user (for favorites demo)
         User::updateOrCreate(
-            ['email' => 'user@warung.com'],
+            ['email' => 'user@tokonabil.com'],
             [
                 'name' => 'Pelanggan',
                 'password' => Hash::make('user123'),

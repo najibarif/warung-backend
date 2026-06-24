@@ -19,6 +19,7 @@ class ProductController extends Controller
 
         // Search
         if ($search = $request->search) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $search);
             $query->where('name', 'like', "%{$search}%")
                 ->orWhere('barcode', $search);
         }
@@ -60,11 +61,11 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_id' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'barcode' => 'nullable|string|unique:products,barcode',
             'description' => 'nullable|string',
             'is_promo' => 'nullable|boolean',
@@ -101,11 +102,11 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'category_id' => 'sometimes|string',
+            'category_id' => 'sometimes|exists:categories,id',
             'name' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
             'stock' => 'sometimes|integer|min:0',
-            'image' => 'nullable',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'barcode' => 'nullable|string|unique:products,barcode,' . $product->id,
             'description' => 'nullable|string',
             'is_promo' => 'nullable|boolean',
