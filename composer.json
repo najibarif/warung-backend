@@ -9,8 +9,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
-        "laravel/tinker": "^2.10.1",
-        "mongodb/laravel-mongodb": "^5.8"
+        "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -34,6 +33,9 @@
         }
     },
     "scripts": {
+        "vercel": [
+            "@php -r \"echo 'No .env file needed - using Vercel env vars' . PHP_EOL;\""
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",

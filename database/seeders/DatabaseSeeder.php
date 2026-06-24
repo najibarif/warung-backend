@@ -13,20 +13,24 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin user
-        User::create([
-            'name' => 'Admin Warung',
-            'email' => 'admin@warung.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@warung.com'],
+            [
+                'name' => 'Admin Warung',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
 
         // Guest user (for favorites demo)
-        User::create([
-            'name' => 'Pelanggan',
-            'email' => 'user@warung.com',
-            'password' => Hash::make('password'),
-            'role' => 'user',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'user@warung.com'],
+            [
+                'name' => 'Pelanggan',
+                'password' => Hash::make('user123'),
+                'role' => 'user',
+            ]
+        );
 
         // Categories
         $categories = [
@@ -35,13 +39,13 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Snack', 'icon' => '🍪'],
             ['name' => 'Kebersihan', 'icon' => '🧹'],
             ['name' => 'Kesehatan', 'icon' => '💊'],
-            ['name' => 'Rokok', 'icon' => '🚬'],
             ['name' => 'Alat Tulis', 'icon' => '✏️'],
+            ['name' => 'Lainnya', 'icon' => '📦'],
         ];
 
         $catModels = [];
         foreach ($categories as $cat) {
-            $catModels[] = Category::create($cat);
+            $catModels[] = Category::updateOrCreate(['name' => $cat['name']], $cat);
         }
 
         // Sample products
@@ -63,18 +67,20 @@ class DatabaseSeeder extends Seeder
             ['category_id' => $catModels[3]->id, 'name' => 'Rinso 900gr', 'price' => 25000, 'stock' => 4, 'barcode' => 'BC015'],
             ['category_id' => $catModels[4]->id, 'name' => 'Panadol 10 Tab', 'price' => 10000, 'stock' => 20, 'barcode' => 'BC016'],
             ['category_id' => $catModels[4]->id, 'name' => 'Tolak Angin Sachet', 'price' => 5000, 'stock' => 50, 'is_promo' => true, 'promo_price' => 4000, 'barcode' => 'BC017'],
-            ['category_id' => $catModels[5]->id, 'name' => 'Rokok Sampoerna 16', 'price' => 25000, 'stock' => 30, 'is_best_seller' => true, 'barcode' => 'BC018'],
-            ['category_id' => $catModels[6]->id, 'name' => 'Pulpen Pilot', 'price' => 4500, 'stock' => 2, 'barcode' => 'BC019'],
-            ['category_id' => $catModels[6]->id, 'name' => 'Buku Tulis 40 Lembar', 'price' => 6000, 'stock' => 50, 'barcode' => 'BC020'],
+            ['category_id' => $catModels[5]->id, 'name' => 'Pulpen Pilot', 'price' => 4500, 'stock' => 2, 'barcode' => 'BC019'],
+            ['category_id' => $catModels[5]->id, 'name' => 'Buku Tulis 40 Lembar', 'price' => 6000, 'stock' => 50, 'barcode' => 'BC020'],
         ];
 
         foreach ($products as $p) {
-            Product::create(array_merge([
-                'is_promo' => false,
-                'promo_price' => null,
-                'is_best_seller' => false,
-                'description' => 'Produk berkualitas dari warung kami.',
-            ], $p));
+            Product::updateOrCreate(
+                ['barcode' => $p['barcode']],
+                array_merge([
+                    'is_promo' => false,
+                    'promo_price' => null,
+                    'is_best_seller' => false,
+                    'description' => 'Produk berkualitas dari warung kami.',
+                ], $p)
+            );
         }
     }
 }

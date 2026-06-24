@@ -65,8 +65,12 @@ class ProductController extends Controller
         $validated['stock'] = (int) $validated['stock'];
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
+            try {
+                $path = $request->file('image')->store('products', 'public');
+                $validated['image'] = $path;
+            } catch (\Exception $e) {
+                // Serverless: file upload may not persist, skip silently
+            }
         }
 
         $product = Product::create($validated);
@@ -89,7 +93,6 @@ class ProductController extends Controller
         if (isset($validated['price'])) $validated['price'] = (float) $validated['price'];
         if (isset($validated['stock'])) $validated['stock'] = (int) $validated['stock'];
 
-        // Track price history if price changed
         if (isset($validated['price']) && $validated['price'] != $product->price) {
             PriceHistory::create([
                 'product_id' => $product->id,
@@ -102,20 +105,14 @@ class ProductController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+            try {
+                if ($product->image && !str_starts_with($product->image, 'http')) {
+                    Storage::disk('public')->delete($product->image);
+                }
+                $validated['image'] = $request->file('image')->store('products', 'public');
+            } catch (\Exception $e) {
+                // Serverless: file upload may not persist, skip silently
             }
-            $validated['image'] = $request->file('image')->store('products', 'public');
-        }
-
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
-            if ($product->image && \Illuminate\Support\Facades\Storage::disk('public')->exists($product->image) && !str_starts_with($product->image, 'http')) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
-            }
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
         }
 
         $product->update($validated);
@@ -126,8 +123,10 @@ class ProductController extends Controller
     /** DELETE /api/products/{id} — Admin */
     public function destroy(Product $product)
     {
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+        if ($product->image && !str_starts_with($product->image, 'http')) {
+            try {
+                Storage::disk('public')->delete($product->image);
+            } catch (\Exception $e) {}
         }
         $product->delete();
 

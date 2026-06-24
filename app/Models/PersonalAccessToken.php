@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\Contracts\HasAbilities;
 
 /**
@@ -22,7 +22,7 @@ class PersonalAccessToken extends Model implements HasAbilities
      *
      * @var string
      */
-    protected $collection = 'personal_access_tokens';
+    protected $table = 'personal_access_tokens';
 
     /**
      * The attributes that should be cast to native types.

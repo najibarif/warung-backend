@@ -1,5 +1,9 @@
 <?php
 
+Route::get('/ping', function () {
+    return response()->json(['pong' => true]);
+});
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -52,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
         // Kasir & Dashboard
         Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index']);
+        Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show']);
         Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
         Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'stats']);
     });

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -15,6 +15,10 @@ class Product extends Model
         'stock',
         'image',
         'barcode',
+        'description',
+        'is_promo',
+        'promo_price',
+        'is_best_seller',
     ];
 
     protected $casts = [

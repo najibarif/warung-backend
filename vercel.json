@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.9.0"
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "vercel-php@0.9.0"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
@@ -13,7 +14,23 @@
   ],
   "env": {
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
-    "LOG_CHANNEL": "stderr"
+    "APP_DEBUG": "false",
+    "LOG_CHANNEL": "stderr",
+    "SESSION_DRIVER": "array",
+    "CACHE_STORE": "array",
+    "FILESYSTEM_DISK": "local",
+    "APP_KEY": "base64:GmpMOR3qS+offH4zZm/tcxf81Puku+JiKOG/JN2aRMM=",
+    "APP_URL": "https://backend-eight-blond-89.vercel.app",
+    "DB_CONNECTION": "mysql",
+    "DB_HOST": "gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com",
+    "DB_PORT": "4000",
+    "DB_DATABASE": "warung",
+    "MYSQL_ATTR_SSL_CA": "/etc/ssl/certs/ca-certificates.crt",
+    "VERCEL": "1",
+    "APP_SERVICES_CACHE": "/tmp/storage/framework/cache/services.php",
+    "APP_PACKAGES_CACHE": "/tmp/storage/framework/cache/packages.php",
+    "APP_CONFIG_CACHE": "/tmp/storage/framework/cache/config.php",
+    "APP_ROUTES_CACHE": "/tmp/storage/framework/cache/routes.php",
+    "APP_EVENTS_CACHE": "/tmp/storage/framework/cache/events.php"
   }
 }

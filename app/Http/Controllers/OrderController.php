@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -15,12 +13,20 @@ class OrderController extends Controller
         $orders = Order::with('items.product')->latest()->get();
         return response()->json(['data' => $orders]);
     }
+
+    public function show(Order $order)
+    {
+        $order->load('items.product');
+        return response()->json(['data' => $order]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'amount_paid' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -55,10 +61,15 @@ class OrderController extends Controller
             $monthLetter = chr(64 + (int)date('m')); // 1=A, 2=B, 6=F, dst
             $uniqueCode = date('d') . date('H') . '-' . $monthLetter . date('i') . date('y');
 
+            $amountPaid = $request->amount_paid ?? $totalAmount;
+            $changeAmount = max(0, $amountPaid - $totalAmount);
+
             $order = Order::create([
                 'order_number' => $uniqueCode,
                 'user_id' => $request->user()->id ?? null,
                 'total_amount' => $totalAmount,
+                'amount_paid' => $amountPaid,
+                'change_amount' => $changeAmount,
                 'payment_method' => 'tunai',
             ]);
 

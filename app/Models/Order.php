@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
@@ -13,6 +13,8 @@ class Order extends Model
         'order_number',
         'user_id',
         'total_amount',
+        'amount_paid',
+        'change_amount',
         'payment_method',
     ];
 
