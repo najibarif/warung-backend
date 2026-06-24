@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ── Public routes ────────────────────────────────────────────────────────
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 Route::post('/login', [AuthController::class, 'login']);
 
 // Products (public read)
