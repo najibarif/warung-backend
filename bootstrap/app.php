@@ -35,7 +35,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
         });
         $exceptions->render(function (\Throwable $e, Request $request) {
-            if (($request->expectsJson() || $request->is('api/*')) && !$e instanceof AuthenticationException && !$e instanceof ModelNotFoundException) {
+            if (config('app.debug')) {
+                return null;
+            }
+            if (($request->expectsJson() || $request->is('api/*')) 
+                && !$e instanceof AuthenticationException 
+                && !$e instanceof ModelNotFoundException
+                && !$e instanceof \Illuminate\Validation\ValidationException
+            ) {
                 return response()->json([
                     'message' => 'Internal Server Error'
                 ], 500);
