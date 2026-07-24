@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int|null $category_id
+ * @property string $name
+ * @property float $price
+ * @property int $stock
+ * @property string|null $image
+ * @property string|null $barcode
+ * @property string|null $description
+ * @property bool $is_promo
+ * @property float|null $promo_price
+ * @property bool $is_best_seller
+ * @property \Carbon\Carbon|null $expired_at
+ * @property int|null $expiration_discount
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property-read float $effective_price
+ * @property-read bool $is_low_stock
+ */
 class Product extends Model
 {
     protected $fillable = [
