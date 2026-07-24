@@ -23,7 +23,7 @@ Route::get('/ping', function () {
     ]);
 });
 
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login']);
 
 // Products (public read)
 Route::get('/products', [ProductController::class, 'index']);
