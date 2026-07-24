@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\Contracts\HasAbilities;
+use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 
 /**
  * @property string $id
@@ -15,7 +14,7 @@ use Laravel\Sanctum\Contracts\HasAbilities;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
-class PersonalAccessToken extends Model implements HasAbilities
+class PersonalAccessToken extends SanctumPersonalAccessToken
 {
     /**
      * The collection associated with the model.
